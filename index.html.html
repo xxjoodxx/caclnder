@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Year Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f6f2;--fg:#1c1c1c;--mute:#8a8a85;--line:#d9d8d2;--acc:#3f8f66;--soft:#dcebe2;--today-fg:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171717;--fg:#ededed;--mute:#7d7d79;--line:#333;--acc:#4fa97c;--soft:#1f2e26;--today-fg:#0d1a12}}
+:root[data-theme="dark"]{--bg:#171717;--fg:#ededed;--mute:#7d7d79;--line:#333;--acc:#4fa97c;--soft:#1f2e26;--today-fg:#0d1a12}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;padding:20px 22px 28px}
+.serif{font-family:"Playfair Display",Georgia,serif}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px;flex-wrap:wrap}
+.yr{display:flex;align-items:center;gap:14px}
+h1{margin:0;font-size:44px;font-weight:500;line-height:1}
+button{background:none;border:1px solid var(--line);color:var(--fg);border-radius:999px;height:34px;min-width:34px;padding:0 12px;font-size:16px;cursor:pointer}
+button:active{background:var(--soft)}
+.tag{font-style:italic;color:var(--acc);font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 30px}
+@media (max-width:720px){.grid{grid-template-columns:repeat(2,1fr);gap:22px 18px}}
+@media (max-width:460px){.grid{grid-template-columns:1fr}}
+.mh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:6px}
+.mn{font-size:22px;font-style:italic}
+.mi{font-size:11px;letter-spacing:.15em;color:var(--mute)}
+.days{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;row-gap:2px}
+.dw{font-size:11px;color:var(--mute);padding:6px 0}
+.d{font-size:14px;height:30px;display:flex;align-items:center;justify-content:center}
+.d span{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.d.sun span{background:var(--soft)}
+.d.today span{background:var(--acc);color:var(--today-fg);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div class="yr">
+    <button id="prev" aria-label="Previous year">‹</button>
+    <h1 class="serif" id="year"></h1>
+    <button id="next" aria-label="Next year">›</button>
+    <button id="now">today</button>
+  </div>
+  <div class="tag serif">the whole year, at a glance</div>
+</header>
+<div class="grid" id="grid"></div>
+<script>
+var MONTHS=["january","february","march","april","may","june","july","august","september","october","november","december"];
+var DW=["M","T","W","T","F","S","S"];
+var year=new Date().getFullYear();
+function render(){
+  var t=new Date(),ty=t.getFullYear(),tm=t.getMonth(),td=t.getDate();
+  document.getElementById("year").textContent=year;
+  var h="";
+  for(var m=0;m<12;m++){
+    var off=(new Date(year,m,1).getDay()+6)%7;
+    var n=new Date(year,m+1,0).getDate();
+    h+='<div><div class="mh"><span class="mn serif">'+MONTHS[m]+'</span><span class="mi">'+String(m+1).padStart(2,"0")+'</span></div><div class="days">';
+    DW.forEach(function(x){h+='<div class="dw">'+x+'</div>'});
+    for(var i=0;i<off;i++)h+='<div class="d"></div>';
+    for(var d=1;d<=n;d++){
+      var c="d";
+      if((off+d-1)%7===6)c+=" sun";
+      if(year===ty&&m===tm&&d===td)c+=" today";
+      h+='<div class="'+c+'"><span>'+d+'</span></div>';
+    }
+    h+='</div></div>';
+  }
+  document.getElementById("grid").innerHTML=h;
+}
+document.getElementById("prev").onclick=function(){year--;render()};
+document.getElementById("next").onclick=function(){year++;render()};
+document.getElementById("now").onclick=function(){year=new Date().getFullYear();render()};
+document.addEventListener("keydown",function(e){if(e.key==="ArrowLeft"){year--;render()}if(e.key==="ArrowRight"){year++;render()}});
+render();
+setInterval(function(){render()},3600000);
+</script>
+</body>
+</html>
